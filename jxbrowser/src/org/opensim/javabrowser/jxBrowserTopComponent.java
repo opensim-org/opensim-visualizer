@@ -55,7 +55,7 @@ public final class jxBrowserTopComponent extends TopComponent {
         browser = new Browser(BrowserType.HEAVYWEIGHT);
         view = new BrowserView(browser);
         jPanel1.add(view);
-        browser.loadURL("http://threejs.org/editor");
+        browser.loadURL("http://localhost:8002/threejs/editor/index.html");
         jPanel1.validate();
          
         setName(Bundle.CTL_jxBrowserTopComponent());
