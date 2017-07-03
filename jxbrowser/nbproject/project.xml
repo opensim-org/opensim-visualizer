@@ -7,14 +7,6 @@
             <suite-component/>
             <module-dependencies>
                 <dependency>
-                    <code-name-base>com.teamdev.jxbrowser</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>1.0</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
                     <code-name-base>org.netbeans.modules.settings</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
@@ -56,7 +48,33 @@
                     </run-dependency>
                 </dependency>
             </module-dependencies>
-            <public-packages/>
+            <public-packages>
+                <package>org.opensim.javabrowser</package>
+            </public-packages>
+            <class-path-extension>
+                <runtime-relative-path>ext/jxbrowser-mac-6.4.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jxbrowser-mac-6.4.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/jxbrowser-linux64-6.4.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jxbrowser-linux64-6.4.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/jxbrowser-linux32-6.4.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jxbrowser-linux32-6.4.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/license.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/license.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/jxbrowser-6.4.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jxbrowser-6.4.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/jxbrowser-win-6.4.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jxbrowser-win-6.4.jar</binary-origin>
+            </class-path-extension>
         </data>
     </configuration>
 </project>
