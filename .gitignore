@@ -1,0 +1,10 @@
+/build/
+/jxbrowser/build/
+/jxbrowser/nbproject/private/
+/nbproject/private/
+/utils/build/
+/visualizationServer/build/
+.DS_Store
+err.log
+out.log
+hs_err_*.log
