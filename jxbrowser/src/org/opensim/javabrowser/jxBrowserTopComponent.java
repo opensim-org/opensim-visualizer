@@ -6,11 +6,14 @@
 package org.opensim.javabrowser;
 
 import com.teamdev.jxbrowser.chromium.Browser;
+import com.teamdev.jxbrowser.chromium.BrowserContext;
+import com.teamdev.jxbrowser.chromium.BrowserContextParams;
 import com.teamdev.jxbrowser.chromium.BrowserType;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
+import org.openide.modules.Places;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.opensim.view.pub.ViewDB;
@@ -45,8 +48,17 @@ public final class jxBrowserTopComponent extends TopComponent {
 
     public jxBrowserTopComponent() {
         initComponents();
-
-        browser = new Browser(BrowserType.HEAVYWEIGHT);
+        
+        BrowserContextParams bcp = new BrowserContextParams(
+            Places.getUserDirectory() + "/EmbeddedBrowserCache");
+        BrowserContext browserContext = new BrowserContext(bcp);
+        browser = new Browser(BrowserType.HEAVYWEIGHT, browserContext);
+        // This clears the cache in the <user-dir>/EmbeddedBrowserCache/Cache
+        // folder (asynchronously). Doing so is necessary to ensure that Models
+        // reliably show up in the visualizer. It's important to not delete
+        // the entire EmbeddedBrowserCache folder, so as to retain user
+        // settings for the floor, etc.
+        browser.getCacheStorage().clearCache();
         view = new BrowserView(browser);
         jPanel1.add(view);
         ViewDB.startVisualizationServer();
