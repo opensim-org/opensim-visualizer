@@ -7,19 +7,13 @@ package org.opensim.javabrowser;
 
 import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.BrowserType;
-import com.teamdev.jxbrowser.chromium.events.LoadListener;
-import com.teamdev.jxbrowser.chromium.events.RenderEvent;
-import com.teamdev.jxbrowser.chromium.events.RenderListener;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import javax.swing.JButton;
-import javax.swing.SwingUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
+import org.opensim.view.pub.ViewDB;
 
 /**
  * Top component which displays something.
@@ -41,9 +35,9 @@ import org.openide.util.NbBundle.Messages;
         preferredID = "jxBrowserTopComponent"
 )
 @Messages({
-    "CTL_jxBrowserAction=jxBrowser",
-    "CTL_jxBrowserTopComponent=jxBrowser Window",
-    "HINT_jxBrowserTopComponent=This is a jxBrowser window"
+    "CTL_jxBrowserAction=Visualizer",
+    "CTL_jxBrowserTopComponent=Visualizer Window",
+    "HINT_jxBrowserTopComponent=This is a Visualizer window"
 })
 public final class jxBrowserTopComponent extends TopComponent {
     Browser browser; 
@@ -55,6 +49,7 @@ public final class jxBrowserTopComponent extends TopComponent {
         browser = new Browser(BrowserType.HEAVYWEIGHT);
         view = new BrowserView(browser);
         jPanel1.add(view);
+        ViewDB.startVisualizationServer();
         browser.loadURL("http://localhost:8002/threejs/editor/index.html");
         jPanel1.validate();
          
