@@ -8,7 +8,10 @@ package org.opensim.javabrowser;
 import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.BrowserContext;
 import com.teamdev.jxbrowser.chromium.BrowserContextParams;
+import com.teamdev.jxbrowser.chromium.BrowserPreferences;
 import com.teamdev.jxbrowser.chromium.BrowserType;
+import com.teamdev.jxbrowser.chromium.events.ConsoleEvent;
+import com.teamdev.jxbrowser.chromium.events.ConsoleListener;
 import com.teamdev.jxbrowser.chromium.events.LoadListener;
 import com.teamdev.jxbrowser.chromium.events.RenderEvent;
 import com.teamdev.jxbrowser.chromium.events.RenderListener;
@@ -55,6 +58,16 @@ public final class jxBrowserTopComponent extends TopComponent {
     public jxBrowserTopComponent() {
         initComponents();
         
+        // Must set preferences before starting the browser.
+        BrowserPreferences.setChromiumSwitches(
+                // This switch allows us to read files that are anywhere on 
+                // the user's computer, when loading the webpage using the
+                // file:// protocol.
+                "--allow-file-access-from-files",
+                "--disable-web-security"
+                //"--remote-debugging-port=9222"/*TODOTEMPDEBUG*/
+        );
+        
         BrowserContextParams bcp = new BrowserContextParams(
             Places.getUserDirectory() + "/EmbeddedBrowserCache");
         BrowserContext browserContext = new BrowserContext(bcp);
@@ -65,6 +78,9 @@ public final class jxBrowserTopComponent extends TopComponent {
         // the entire EmbeddedBrowserCache folder, so as to retain user
         // settings for the floor, etc.
         browser.getCacheStorage().clearCache();
+        
+        System.out.println("DEBUG remote debugging URL"+browser.getRemoteDebuggingURL().toString());
+        
         view = new BrowserView(browser);
         jPanel1.add(view);
         browser.loadURL("http://localhost:8002/threejs/editor/index.html");
