@@ -10,12 +10,20 @@ import com.teamdev.jxbrowser.chromium.BrowserContext;
 import com.teamdev.jxbrowser.chromium.BrowserContextParams;
 import com.teamdev.jxbrowser.chromium.BrowserType;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Observable;
+import java.util.Observer;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.modules.Places;
+import org.openide.util.Exceptions;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
+import org.opensim.view.ModelEvent;
+import org.opensim.view.pub.OpenSimDB;
 import org.opensim.view.pub.ViewDB;
 
 /**
@@ -42,7 +50,7 @@ import org.opensim.view.pub.ViewDB;
     "CTL_jxBrowserTopComponent=Visualizer Window",
     "HINT_jxBrowserTopComponent=This is a Visualizer window"
 })
-public final class jxBrowserTopComponent extends TopComponent {
+public final class jxBrowserTopComponent extends TopComponent implements Observer {
     Browser browser; 
     BrowserView view; 
 
@@ -62,7 +70,8 @@ public final class jxBrowserTopComponent extends TopComponent {
         view = new BrowserView(browser);
         jPanel1.add(view);
         ViewDB.startVisualizationServer();
-        browser.loadURL("http://localhost:8002/threejs/editor/index.html");
+        OpenSimDB.getInstance().addObserver(this);
+        browser.loadHTML("<html><body></body></html>");
         jPanel1.validate();
          
         setName(Bundle.CTL_jxBrowserTopComponent());
@@ -103,7 +112,6 @@ public final class jxBrowserTopComponent extends TopComponent {
     @Override
     public void componentOpened() {
         // TODO add custom code on component opening
-        //browser.reload();
     }
 
     @Override
@@ -121,5 +129,16 @@ public final class jxBrowserTopComponent extends TopComponent {
     void readProperties(java.util.Properties p) {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        if (arg instanceof ModelEvent){
+            ModelEvent ev = (ModelEvent) arg;
+            if (ev.getOperation()==ModelEvent.Operation.Open){
+                browser.loadURL("http://localhost:8002/threejs/editor/index.html");
+                OpenSimDB.getInstance().deleteObserver(this);
+            }
+        }
     }
 }
