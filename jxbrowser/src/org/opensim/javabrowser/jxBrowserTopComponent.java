@@ -23,6 +23,7 @@ import org.openide.util.Exceptions;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.opensim.view.ModelEvent;
+import org.opensim.view.ObjectSetCurrentEvent;
 import org.opensim.view.pub.OpenSimDB;
 import org.opensim.view.pub.ViewDB;
 
@@ -137,6 +138,10 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
             ModelEvent ev = (ModelEvent) arg;
             if (ev.getOperation()==ModelEvent.Operation.Open){
                 browser.loadURL("http://localhost:8002/threejs/editor/index.html");
+                //OpenSimDB.getInstance().deleteObserver(this);
+            }
+            else if (arg instanceof ObjectSetCurrentEvent){
+                browser.reload();
                 OpenSimDB.getInstance().deleteObserver(this);
             }
         }
