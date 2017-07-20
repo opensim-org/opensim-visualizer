@@ -141,7 +141,7 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
                 //OpenSimDB.getInstance().deleteObserver(this);
             }
             else if (arg instanceof ObjectSetCurrentEvent){
-                browser.reload();
+                browser.reloadIgnoringCache(true);
                 OpenSimDB.getInstance().deleteObserver(this);
             }
         }
