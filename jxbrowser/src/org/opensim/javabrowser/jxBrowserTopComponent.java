@@ -82,7 +82,10 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
         jPanel1.add(view);
         ViewDB.startVisualizationServer();
         OpenSimDB.getInstance().addObserver(this);
-        browser.loadHTML("<html><body></body></html>");
+        if (OpenSimDB.getInstance().hasModels())
+            browser.loadURL("http://localhost:8002/threejs/editor/index.html");
+        else
+            browser.loadHTML("<html><body></body></html>");
         jPanel1.validate();
          
         setName(Bundle.CTL_jxBrowserTopComponent());
