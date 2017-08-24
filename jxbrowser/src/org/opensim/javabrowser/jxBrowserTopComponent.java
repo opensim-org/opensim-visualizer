@@ -8,19 +8,19 @@ package org.opensim.javabrowser;
 import com.teamdev.jxbrowser.chromium.Browser;
 import com.teamdev.jxbrowser.chromium.BrowserContext;
 import com.teamdev.jxbrowser.chromium.BrowserContextParams;
+import com.teamdev.jxbrowser.chromium.BrowserPreferences;
 import com.teamdev.jxbrowser.chromium.BrowserType;
-import com.teamdev.jxbrowser.chromium.JSONString;
-import com.teamdev.jxbrowser.chromium.JSValue;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.prefs.Preferences;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.modules.Places;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
-import org.opensim.view.ModelEvent;
+import org.opensim.utils.TheApp;
 import org.opensim.view.ObjectSetCurrentEvent;
 import org.opensim.view.pub.OpenSimDB;
 import org.opensim.view.pub.ViewDB;
@@ -55,11 +55,23 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
 
     public jxBrowserTopComponent() {
         initComponents();
-        
+        String useGPU = "On";        
+        String savedGPU = Preferences.userNodeForPackage(TheApp.class).get("GPU Acceleration", useGPU);
+        Preferences.userNodeForPackage(TheApp.class).put("GPU Acceleration", savedGPU);
+        String useLightWeight = "Off";        
+        String savedLightWeight = Preferences.userNodeForPackage(TheApp.class).get("LightWeight Browser", useLightWeight);
+        Preferences.userNodeForPackage(TheApp.class).put("LightWeight Browser", savedLightWeight);
+
         BrowserContextParams bcp = new BrowserContextParams(
             Places.getUserDirectory() + "/EmbeddedBrowserCache");
         BrowserContext browserContext = new BrowserContext(bcp);
-        browser = new Browser(BrowserType.HEAVYWEIGHT, browserContext);
+        if (savedGPU.equalsIgnoreCase("off")){
+            BrowserPreferences.setChromiumSwitches("--disable-gpu");
+        }
+        if (savedLightWeight.equalsIgnoreCase("on"))
+            browser = new Browser(BrowserType.LIGHTWEIGHT, browserContext);
+        else 
+            browser = new Browser(BrowserType.HEAVYWEIGHT, browserContext);
         // This clears the cache in the <user-dir>/EmbeddedBrowserCache/Cache
         // folder (asynchronously). Doing so is necessary to ensure that Models
         // reliably show up in the visualizer. It's important to not delete
