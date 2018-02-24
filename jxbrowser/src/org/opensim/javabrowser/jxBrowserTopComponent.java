@@ -79,6 +79,7 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
         // settings for the floor, etc.
         browser.getCacheStorage().clearCache();
         view = new BrowserView(browser);
+        view.setDragAndDropEnabled(false); // Disable DnD altogther
         jPanel1.add(view);
         ViewDB.startVisualizationServer();
         OpenSimDB.getInstance().addObserver(this);
