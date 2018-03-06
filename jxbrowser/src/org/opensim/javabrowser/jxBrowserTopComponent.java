@@ -11,6 +11,10 @@ import com.teamdev.jxbrowser.chromium.BrowserContextParams;
 import com.teamdev.jxbrowser.chromium.BrowserPreferences;
 import com.teamdev.jxbrowser.chromium.BrowserType;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.prefs.Preferences;
@@ -18,6 +22,7 @@ import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.modules.Places;
+import org.openide.util.Exceptions;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.opensim.utils.TheApp;
@@ -86,7 +91,7 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
         if (OpenSimDB.getInstance().hasModels())
             browser.loadURL("http://127.0.0.1:8002/threejs/editor/index.html");
         else
-            browser.loadHTML("<html><body></body></html>");
+            browser.loadHTML(getWelcomePage());
         jPanel1.validate();
          
         setName(Bundle.CTL_jxBrowserTopComponent());
@@ -154,6 +159,16 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
             //JSValue window = browser.executeJavaScriptAndReturnValue("window");
             //window.asObject().setProperty("myObject", ViewDB.getInstance().getCurrentJson());
             OpenSimDB.getInstance().deleteObserver(this);
+        }
+     }
+
+    private String getWelcomePage() {
+        try {
+            byte[] encoded = Files.readAllBytes(Paths.get("Welcome.html"));
+            return new String(encoded, Charset.defaultCharset());
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+            return ("<html><body>Welcome to OpenSim 4.0</body></html>");
         }
      }
 }
