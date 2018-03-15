@@ -11,12 +11,13 @@ import com.teamdev.jxbrowser.chromium.BrowserContextParams;
 import com.teamdev.jxbrowser.chromium.BrowserPreferences;
 import com.teamdev.jxbrowser.chromium.BrowserType;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Scanner;
 import java.util.prefs.Preferences;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
@@ -163,12 +164,27 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
      }
 
     private String getWelcomePage() {
+        BufferedReader in=null;
+        String htmlString="Welcome to OpenSim 4.0";
         try {
-            byte[] encoded = Files.readAllBytes(Paths.get("Welcome.html"));
-            return new String(encoded, Charset.defaultCharset());
+            
+            URL welcomeURL = getClass().getClassLoader().getResource("org/opensim/javabrowser/welcome.html");
+            in = new BufferedReader(
+                    new InputStreamReader(welcomeURL.openStream()));
+            String inputLine;
+            htmlString = "";
+            while ((inputLine = in.readLine()) != null)
+                htmlString = htmlString.concat(inputLine);
+            in.close();
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
-            return ("<html><body>Welcome to OpenSim 4.0</body></html>");
+        } finally {
+            try {
+                in.close();
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
+        return ("<html><body>"+htmlString+"</body></html>");
      }
 }
