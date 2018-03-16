@@ -178,13 +178,7 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
             in.close();
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
-        } finally {
-            try {
-                in.close();
-            } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-        }
+        } 
         return ("<html><body>"+htmlString+"</body></html>");
      }
 }
