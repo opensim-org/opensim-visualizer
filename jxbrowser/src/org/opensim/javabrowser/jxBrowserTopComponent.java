@@ -74,6 +74,7 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
         if (savedGPU.equalsIgnoreCase("off")){
             BrowserPreferences.setChromiumSwitches("--disable-gpu");
         }
+        BrowserPreferences.setChromiumSwitches("--ignore-gpu-blacklist");
         if (savedLightWeight.equalsIgnoreCase("on"))
             browser = new Browser(BrowserType.LIGHTWEIGHT, browserContext);
         else 
