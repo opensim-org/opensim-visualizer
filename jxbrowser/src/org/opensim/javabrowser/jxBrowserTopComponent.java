@@ -17,16 +17,17 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Scanner;
 import java.util.prefs.Preferences;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
+import org.openide.awt.UndoRedo;
 import org.openide.modules.Places;
 import org.openide.util.Exceptions;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.opensim.utils.TheApp;
+import org.opensim.view.ExplorerTopComponent;
 import org.opensim.view.ObjectSetCurrentEvent;
 import org.opensim.view.pub.OpenSimDB;
 import org.opensim.view.pub.ViewDB;
@@ -182,4 +183,10 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
         } 
         return ("<html><body>"+htmlString+"</body></html>");
      }
+    
+    @Override
+    public UndoRedo getUndoRedo() {
+        return ExplorerTopComponent.getDefault().getUndoRedo();
+    }
+
 }
