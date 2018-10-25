@@ -59,9 +59,10 @@ import org.opensim.view.pub.ViewDB;
 public final class jxBrowserTopComponent extends TopComponent implements Observer {
     Browser browser; 
     BrowserView view; 
-
+    String portString;
     public jxBrowserTopComponent() {
         initComponents();
+        portString = ViewDB.getVisualizationServerPort();
         String useGPU = "On";        
         String savedGPU = Preferences.userNodeForPackage(TheApp.class).get("GPU Acceleration", useGPU);
         Preferences.userNodeForPackage(TheApp.class).put("GPU Acceleration", savedGPU);
@@ -92,7 +93,7 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
         ViewDB.startVisualizationServer();
         OpenSimDB.getInstance().addObserver(this);
         if (OpenSimDB.getInstance().hasModels())
-            browser.loadURL("http://127.0.0.1:8002/threejs/editor/index.html");
+            browser.loadURL("http://127.0.0.1:"+portString+"/threejs/editor/index.html");
         else
             browser.loadHTML(getWelcomePage());
         jPanel1.validate();
@@ -158,7 +159,7 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
     public void update(Observable o, Object arg) {
         if (arg instanceof ObjectSetCurrentEvent){
             ObjectSetCurrentEvent ev = (ObjectSetCurrentEvent) arg;
-            browser.loadURL("http://127.0.0.1:8002/threejs/editor/index.html");
+            browser.loadURL("http://127.0.0.1:"+portString+"/threejs/editor/index.html");
             //JSValue window = browser.executeJavaScriptAndReturnValue("window");
             //window.asObject().setProperty("myObject", ViewDB.getInstance().getCurrentJson());
             OpenSimDB.getInstance().deleteObserver(this);
