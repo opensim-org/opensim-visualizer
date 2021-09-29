@@ -84,28 +84,28 @@
                 <package>org.opensim.javabrowser</package>
             </public-packages>
             <class-path-extension>
-                <runtime-relative-path>ext/jxbrowser-mac-6.14.2.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jxbrowser-mac-6.14.2.jar</binary-origin>
+                <runtime-relative-path>ext/jxbrowser-mac-6.24.2.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jxbrowser-mac-6.24.2.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/jxbrowser-linux64-6.14.2.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jxbrowser-linux64-6.14.2.jar</binary-origin>
+                <runtime-relative-path>ext/jxbrowser-win32-6.24.2.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jxbrowser-win32-6.24.2.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/jxbrowser-linux32-6.14.2.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jxbrowser-linux32-6.14.2.jar</binary-origin>
+                <runtime-relative-path>ext/jxbrowser-6.24.2.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jxbrowser-6.24.2.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/jxbrowser-win64-6.24.2.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jxbrowser-win64-6.24.2.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/license.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/license.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/jxbrowser-6.14.2.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jxbrowser-6.14.2.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/jxbrowser-win32-6.14.2.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jxbrowser-win32-6.14.2.jar</binary-origin>
+                <runtime-relative-path>ext/jxbrowser-linux64-6.24.2.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jxbrowser-linux64-6.24.2.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>
