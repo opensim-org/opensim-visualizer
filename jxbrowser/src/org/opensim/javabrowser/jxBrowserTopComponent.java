@@ -92,8 +92,10 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
         jPanel1.add(view);
         ViewDB.startVisualizationServer();
         OpenSimDB.getInstance().addObserver(this);
-        if (OpenSimDB.getInstance().hasModels())
-            browser.loadURL("http://127.0.0.1:"+portString+"/threejs/editor/index.html");
+        if (OpenSimDB.getInstance().hasModels()){
+            //System.out.println("opening URL [http://127.0.0.1:"+portString+"/]");
+            browser.loadURL("http://127.0.0.1:"+portString+"/");
+        }
         else
             browser.loadHTML(getWelcomePage());
         jPanel1.validate();
@@ -159,7 +161,7 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
     public void update(Observable o, Object arg) {
         if (arg instanceof ObjectSetCurrentEvent){
             ObjectSetCurrentEvent ev = (ObjectSetCurrentEvent) arg;
-            browser.loadURL("http://127.0.0.1:"+portString+"/threejs/editor/index.html");
+            browser.loadURL("http://127.0.0.1:"+portString+"/");
             //JSValue window = browser.executeJavaScriptAndReturnValue("window");
             //window.asObject().setProperty("myObject", ViewDB.getInstance().getCurrentJson());
             OpenSimDB.getInstance().deleteObserver(this);
