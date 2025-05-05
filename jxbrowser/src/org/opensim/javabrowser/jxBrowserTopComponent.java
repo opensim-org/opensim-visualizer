@@ -10,6 +10,8 @@ import com.teamdev.jxbrowser.chromium.BrowserContext;
 import com.teamdev.jxbrowser.chromium.BrowserContextParams;
 import com.teamdev.jxbrowser.chromium.BrowserPreferences;
 import com.teamdev.jxbrowser.chromium.BrowserType;
+import com.teamdev.jxbrowser.chromium.events.ConsoleEvent;
+import com.teamdev.jxbrowser.chromium.events.ConsoleListener;
 import com.teamdev.jxbrowser.chromium.swing.BrowserView;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -92,8 +94,16 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
         jPanel1.add(view);
         ViewDB.startVisualizationServer();
         OpenSimDB.getInstance().addObserver(this);
-        if (OpenSimDB.getInstance().hasModels())
-            browser.loadURL("http://127.0.0.1:"+portString+"/threejs/editor/index.html");
+        if (OpenSimDB.getInstance().hasModels()){
+            browser.loadURL("http://127.0.0.1:"+portString+"/opensim-viewer/index.html");
+            browser.addConsoleListener(new ConsoleListener(){
+                @Override
+                public void onMessage(ConsoleEvent ce) {
+                    System.out.println(ce.getMessage()); //To change body of generated methods, choose Tools | Templates.
+                }
+                
+            });
+        }
         else
             browser.loadHTML(getWelcomePage());
         jPanel1.validate();
@@ -159,7 +169,7 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
     public void update(Observable o, Object arg) {
         if (arg instanceof ObjectSetCurrentEvent){
             ObjectSetCurrentEvent ev = (ObjectSetCurrentEvent) arg;
-            browser.loadURL("http://127.0.0.1:"+portString+"/threejs/editor/index.html");
+            browser.loadURL("http://127.0.0.1:"+portString+"/opensim-viewer/index.html");
             //JSValue window = browser.executeJavaScriptAndReturnValue("window");
             //window.asObject().setProperty("myObject", ViewDB.getInstance().getCurrentJson());
             OpenSimDB.getInstance().deleteObserver(this);
