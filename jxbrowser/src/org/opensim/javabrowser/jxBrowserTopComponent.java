@@ -5,14 +5,13 @@
  */
 package org.opensim.javabrowser;
 
-import com.teamdev.jxbrowser.chromium.Browser;
-import com.teamdev.jxbrowser.chromium.BrowserContext;
-import com.teamdev.jxbrowser.chromium.BrowserContextParams;
-import com.teamdev.jxbrowser.chromium.BrowserPreferences;
-import com.teamdev.jxbrowser.chromium.BrowserType;
-import com.teamdev.jxbrowser.chromium.events.ConsoleEvent;
-import com.teamdev.jxbrowser.chromium.events.ConsoleListener;
-import com.teamdev.jxbrowser.chromium.swing.BrowserView;
+
+import com.teamdev.jxbrowser.engine.Engine;
+import com.teamdev.jxbrowser.engine.EngineOptions;
+import com.teamdev.jxbrowser.engine.RenderingMode;
+import com.teamdev.jxbrowser.browser.Browser;
+import com.teamdev.jxbrowser.view.swing.BrowserView;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -60,7 +59,6 @@ import org.opensim.view.pub.ViewDB;
 })
 public final class jxBrowserTopComponent extends TopComponent implements Observer {
     Browser browser; 
-    BrowserView view; 
     String portString;
     public jxBrowserTopComponent() {
         initComponents();
@@ -71,41 +69,26 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
         String useLightWeight = "Off";        
         String savedLightWeight = Preferences.userNodeForPackage(TheApp.class).get("LightWeight Browser", useLightWeight);
         Preferences.userNodeForPackage(TheApp.class).put("LightWeight Browser", savedLightWeight);
+        //System.setProperty("jxbrowser.logging.level", "ALL");
+		// This is the hardcoded trial license, eventually this will go into private repo
+        Engine engine = Engine.newInstance(EngineOptions.newBuilder(RenderingMode.HARDWARE_ACCELERATED).licenseKey("4UNGXAXTRYIHI4S4DZYH52OM3U0NQ188QVOUJDS0M7QMDCF0RKIL1YBWQJT0U6L5GCDZK7J949904OT7JYQUSHQ7ETBOBK9A3RD2ENRJK48F9HH2F8CWAD3MAP1BZKBN4ZVYC0D9R89R75KTYLN").build());
+        browser = engine.newBrowser();
 
-        BrowserContextParams bcp = new BrowserContextParams(
-            Places.getUserDirectory() + "/EmbeddedBrowserCache");
-        BrowserContext browserContext = new BrowserContext(bcp);
-        if (savedGPU.equalsIgnoreCase("off")){
-            BrowserPreferences.setChromiumSwitches("--disable-gpu");
-        }
-        BrowserPreferences.setChromiumSwitches("--ignore-gpu-blacklist");
-        if (savedLightWeight.equalsIgnoreCase("on"))
-            browser = new Browser(BrowserType.LIGHTWEIGHT, browserContext);
-        else 
-            browser = new Browser(BrowserType.HEAVYWEIGHT, browserContext);
         // This clears the cache in the <user-dir>/EmbeddedBrowserCache/Cache
         // folder (asynchronously). Doing so is necessary to ensure that Models
         // reliably show up in the visualizer. It's important to not delete
         // the entire EmbeddedBrowserCache folder, so as to retain user
         // settings for the floor, etc.
-        browser.getCacheStorage().clearCache();
-        view = new BrowserView(browser);
-        view.setDragAndDropEnabled(false); // Disable DnD altogther
+        BrowserView view = BrowserView.newInstance(browser);
+
         jPanel1.add(view);
         ViewDB.startVisualizationServer();
         OpenSimDB.getInstance().addObserver(this);
         if (OpenSimDB.getInstance().hasModels()){
-            browser.loadURL("http://127.0.0.1:"+portString+"/index.html?css=gui&modern=false");
-            browser.addConsoleListener(new ConsoleListener(){
-                @Override
-                public void onMessage(ConsoleEvent ce) {
-                    System.out.println(ce.getMessage()); //To change body of generated methods, choose Tools | Templates.
-                }
-                
-            });
+            browser.navigation().loadUrl("http://127.0.0.1:"+portString+"/index.html?css=gui&modern=true");
         }
         else
-            browser.loadHTML(getWelcomePage());
+            browser.navigation().loadHtml(getWelcomePage());
         jPanel1.validate();
          
         setName(Bundle.CTL_jxBrowserTopComponent());
@@ -169,7 +152,7 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
     public void update(Observable o, Object arg) {
         if (arg instanceof ObjectSetCurrentEvent){
             ObjectSetCurrentEvent ev = (ObjectSetCurrentEvent) arg;
-            browser.loadURL("http://127.0.0.1:"+portString+"/index.html?css=gui&modern=false");
+            browser.navigation().loadUrl("http://127.0.0.1:"+portString+"/index.html?css=gui&modern=true");
             //JSValue window = browser.executeJavaScriptAndReturnValue("window");
             //window.asObject().setProperty("myObject", ViewDB.getInstance().getCurrentJson());
             OpenSimDB.getInstance().deleteObserver(this);
