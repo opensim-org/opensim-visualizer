@@ -71,7 +71,7 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
         Preferences.userNodeForPackage(TheApp.class).put("LightWeight Browser", savedLightWeight);
         //System.setProperty("jxbrowser.logging.level", "ALL");
 		// This is the hardcoded trial license, eventually this will go into private repo
-        Engine engine = Engine.newInstance(EngineOptions.newBuilder(RenderingMode.OFF_SCREEN).licenseKey("4UNGXAXTRYIHI4S4DZYH52OM3U0NQ188QVOUJDS0M7QMDCF0RKIL1YBWQJT0U6L5GCDZK7J949904OT7JYQUSHQ7ETBOBK9A3RD2ENRJK48F9HH2F8CWAD3MAP1BZKBN4ZVYC0D9R89R75KTYLN").build());
+        Engine engine = Engine.newInstance(EngineOptions.newBuilder(RenderingMode.OFF_SCREEN).licenseKey("unused").build());
         browser = engine.newBrowser();
 
         // This clears the cache in the <user-dir>/EmbeddedBrowserCache/Cache
