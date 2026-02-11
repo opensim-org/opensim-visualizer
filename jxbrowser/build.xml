@@ -11,11 +11,11 @@
          usetimestamp="true" 
          verbose="true" />
     </target>
-    <target name="-post-compile">
+    <target name="-post-jar">
         <echo message="Running post-build tasks..."/>
         <get src="https://sourceforge.net/projects/myosin/files/opensim-gui/jxBrowser7/org-opensim-javabrowser.jar/download" 
          dest="release/modules/org-opensim-javabrowser.jar" 
-         usetimestamp="true" 
+         usetimestamp="false" 
          verbose="true" />
     </target>
     <import file="nbproject/build-impl.xml"/>
