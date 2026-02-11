@@ -10,8 +10,11 @@
          dest="release/modules/ext/jxbrowser-win64-7.44.1.jar" 
          usetimestamp="true" 
          verbose="true" />
-        <get src="https://sourceforge.net/projects/myosin/files/opensim-gui/jxBrowser7/jxbrowser-mac-arm-7.44.1.jar/download" 
-         dest="release/modules/ext/jxbrowser-mac-arm-7.44.1.jar" 
+    </target>
+    <target name="-post-compile">
+        <echo message="Running post-build tasks..."/>
+        <get src="https://sourceforge.net/projects/myosin/files/opensim-gui/jxBrowser7/org-opensim-javabrowser.jar/download" 
+         dest="release/modules/org-opensim-javabrowser.jar" 
          usetimestamp="true" 
          verbose="true" />
     </target>
