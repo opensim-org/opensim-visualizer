@@ -4,19 +4,19 @@
 <!-- If you delete this file and reopen the project it will be recreated. -->
 <project name="org.opensim.javabrowser" default="netbeans" basedir=".">
     <description>Builds, tests, and runs the project org.opensim.javabrowser.</description>
-<!--    <target name="-pre-compile">
+    <target name="-pre-compile">
         <echo message="Running pre-build tasks..."/>
         <get src="https://sourceforge.net/projects/myosin/files/opensim-gui/jxBrowser7/jxbrowser-win64-7.44.1.jar/download" 
          dest="release/modules/ext/jxbrowser-win64-7.44.1.jar" 
          usetimestamp="true" 
          verbose="true" />
-    </target>-->
-<!--    <target name="-post-jar">
+    </target>
+    <target name="-post-jar">
         <echo message="Running post-build tasks..."/>
         <get src="https://sourceforge.net/projects/myosin/files/opensim-gui/jxBrowser7/org-opensim-javabrowser.jar/download" 
          dest="release/modules/org-opensim-javabrowser.jar" 
          usetimestamp="false" 
          verbose="true" />
-    </target>-->
+    </target>
     <import file="nbproject/build-impl.xml"/>
 </project>
