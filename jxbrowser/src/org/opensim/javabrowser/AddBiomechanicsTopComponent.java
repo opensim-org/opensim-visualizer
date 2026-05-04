@@ -4,6 +4,7 @@
  */
 package org.opensim.javabrowser;
 
+import org.opensim.javabrowser.addBiomech.AddBiomechanicsHandleDownloadJPanel;
 import com.teamdev.jxbrowser.browser.Browser;
 import com.teamdev.jxbrowser.browser.callback.StartDownloadCallback;
 import com.teamdev.jxbrowser.download.event.DownloadFinished;
@@ -25,6 +26,7 @@ import org.openide.awt.ActionReference;
 import org.openide.util.Exceptions;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
+import org.opensim.javabrowser.addBiomech.AddBiomechPrefs;
 import org.opensim.view.pub.OpenSimDB;
 import org.opensim.view.pub.ViewDB;
 import org.opensim.logger.OpenSimLogger;
@@ -72,15 +74,17 @@ public final class AddBiomechanicsTopComponent extends TopComponent {
         browser.set(StartDownloadCallback.class, (params, tell) -> {
             params.download().on(DownloadFinished.class, event ->
                     System.out.println("File downloaded!"));
-            Path downloadPath = Paths.get(TheApp.getInstallDir(), "Downloads");
+            Path downloadPath = Paths.get(AddBiomechPrefs.getDownloadsDir());
             Path fullPath = downloadPath.resolve(params.download().target().suggestedFileName());
             tell.download(fullPath);
             OpenSimLogger.logMessage("Downloading finished, file:"+fullPath, 0);
             AddBiomechanicsHandleDownloadJPanel handlePanel = new AddBiomechanicsHandleDownloadJPanel(fullPath.toString());
-            DialogDescriptor dlg = new DialogDescriptor(handlePanel,"How to handle download", false, new ActionListener(){
+            DialogDescriptor dlg = new DialogDescriptor(handlePanel,"How to handle download", false, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+                    if (e.getSource() == NotifyDescriptor.OK_OPTION){
+                        handlePanel.openModelsFromAddbiomechZip(fullPath.toString());
+                    }
                 }
             });
             DialogDisplayer.getDefault().createDialog(dlg).setVisible(true);
@@ -94,8 +98,7 @@ public final class AddBiomechanicsTopComponent extends TopComponent {
         BrowserView view = BrowserView.newInstance(browser);
 
         jPanel1.add(view);
-        browser.navigation().loadUrl("addbiomechanics.org");
-        
+        browser.navigation().loadUrl("addbiomechanics.org/login");
         setName(Bundle.CTL_AddBiomechanicsTopComponent());
         setToolTipText(Bundle.HINT_AddBiomechanicsTopComponent());
 
