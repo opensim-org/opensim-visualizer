@@ -4,7 +4,7 @@
  */
 package org.opensim.javabrowser;
 
-import org.opensim.javabrowser.addBiomech.AddBiomechanicsHandleDownloadJPanel;
+import org.opensim.addBiomech.AddBiomechanicsHandleDownloadJPanel;
 import com.teamdev.jxbrowser.browser.Browser;
 import com.teamdev.jxbrowser.browser.callback.StartDownloadCallback;
 import com.teamdev.jxbrowser.download.event.DownloadFinished;
@@ -26,7 +26,7 @@ import org.openide.awt.ActionReference;
 import org.openide.util.Exceptions;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
-import org.opensim.javabrowser.addBiomech.AddBiomechPrefs;
+import org.opensim.addBiomech.AddBiomechPrefs;
 import org.opensim.view.pub.OpenSimDB;
 import org.opensim.view.pub.ViewDB;
 import org.opensim.logger.OpenSimLogger;
@@ -71,6 +71,20 @@ public final class AddBiomechanicsTopComponent extends TopComponent {
         initComponents();
         Engine engine = Engine.newInstance(EngineOptions.newBuilder(RenderingMode.OFF_SCREEN).licenseKey("5NS6GOQYBIPFCP9K2Y95202NMDQQLZITO27PETD95UJVPMQHJVVD8GEO2UJ9E1D9NNILSGWMG2A1GV4TOQMXOF248GJCGASKC081FX38PYNK02W1ENS8JKXYU3TJCXOUSUCZ7X90YHVCOUD3NU1GHFEZQMAC341IHNU192211JNJQRTRMNFHW").build());
         browser = engine.newBrowser();
+        // Begin hack
+//            String hackPath="C:\\Users\\ayman\\Downloads\\Subject01 (Processed and Reviewed).zip"; 
+//            AddBiomechanicsHandleDownloadJPanel handlePanel = new AddBiomechanicsHandleDownloadJPanel(hackPath); //fullPath.toString()
+//            DialogDescriptor dlg = new DialogDescriptor(handlePanel,"How to handle download", false, new ActionListener() {
+//                @Override
+//                public void actionPerformed(ActionEvent e) {
+//                    if (e.getSource() == NotifyDescriptor.OK_OPTION){
+//                        handlePanel.executeUserAction();
+//                    }
+//                }
+//            });
+//            DialogDisplayer.getDefault().createDialog(dlg).setVisible(true);
+
+        // End hack
         browser.set(StartDownloadCallback.class, (params, tell) -> {
             params.download().on(DownloadFinished.class, event ->
                     System.out.println("File downloaded!"));
@@ -78,12 +92,13 @@ public final class AddBiomechanicsTopComponent extends TopComponent {
             Path fullPath = downloadPath.resolve(params.download().target().suggestedFileName());
             tell.download(fullPath);
             OpenSimLogger.logMessage("Downloading finished, file:"+fullPath, 0);
-            AddBiomechanicsHandleDownloadJPanel handlePanel = new AddBiomechanicsHandleDownloadJPanel(fullPath.toString());
+            String hackHackPath="C:\\Users\\ayman\\Downloads\\Subject01 (Processed and Reviewed).zip"; 
+            AddBiomechanicsHandleDownloadJPanel handlePanel = new AddBiomechanicsHandleDownloadJPanel(hackHackPath); //fullPath.toString()
             DialogDescriptor dlg = new DialogDescriptor(handlePanel,"How to handle download", false, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (e.getSource() == NotifyDescriptor.OK_OPTION){
-                        handlePanel.openModelsFromAddbiomechZip(fullPath.toString());
+                        handlePanel.executeUserAction();
                     }
                 }
             });
