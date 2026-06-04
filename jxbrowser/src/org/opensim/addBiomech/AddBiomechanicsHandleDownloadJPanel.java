@@ -72,6 +72,7 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
     private void initComponents() {
 
         modelActionButtonGroup = new javax.swing.ButtonGroup();
+        jRadioButtonOpenModelNoAssoc = new javax.swing.JRadioButton();
         jLabel1 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         jInfoPanel = new javax.swing.JPanel();
@@ -86,7 +87,14 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
         jPanel2 = new javax.swing.JPanel();
         jRadioButtonOpenAssociate = new javax.swing.JRadioButton();
         jRadioButtonOpenModelOnly = new javax.swing.JRadioButton();
-        jRadioButtonOpenModelNoAssoc = new javax.swing.JRadioButton();
+
+        modelActionButtonGroup.add(jRadioButtonOpenModelNoAssoc);
+        org.openide.awt.Mnemonics.setLocalizedText(jRadioButtonOpenModelNoAssoc, org.openide.util.NbBundle.getMessage(AddBiomechanicsHandleDownloadJPanel.class, "AddBiomechanicsHandleDownloadJPanel.jRadioButtonOpenModelNoAssoc.text")); // NOI18N
+        jRadioButtonOpenModelNoAssoc.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jRadioButtonOpenModelNoAssocActionPerformed(evt);
+            }
+        });
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(AddBiomechanicsHandleDownloadJPanel.class, "AddBiomechanicsHandleDownloadJPanel.jLabel1.text")); // NOI18N
 
@@ -180,14 +188,6 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
             }
         });
 
-        modelActionButtonGroup.add(jRadioButtonOpenModelNoAssoc);
-        org.openide.awt.Mnemonics.setLocalizedText(jRadioButtonOpenModelNoAssoc, org.openide.util.NbBundle.getMessage(AddBiomechanicsHandleDownloadJPanel.class, "AddBiomechanicsHandleDownloadJPanel.jRadioButtonOpenModelNoAssoc.text")); // NOI18N
-        jRadioButtonOpenModelNoAssoc.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButtonOpenModelNoAssocActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -195,9 +195,8 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jRadioButtonOpenAssociate)
-                    .addComponent(jRadioButtonOpenModelOnly)
-                    .addComponent(jRadioButtonOpenModelNoAssoc))
-                .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jRadioButtonOpenModelOnly))
+                .addGap(0, 159, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -205,9 +204,7 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
                 .addComponent(jRadioButtonOpenModelOnly)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jRadioButtonOpenAssociate)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jRadioButtonOpenModelNoAssoc)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, 0))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -426,8 +423,6 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
 
     @Override
     public void update(Observable o, Object arg) {
-        System.out.println("received update: observable "+o.getClass().getSimpleName() +
-                "Object is:"+arg.toString());
         if (userSelectedAction==0){
            OpenSimDB.getInstance().deleteObserver(this);
            MotionsDB.getInstance().deleteObserver(this);
@@ -476,17 +471,7 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
             }});
             
         }
-        if (trialLoadingStatus==2){
-            System.out.println("Event:"+arg.getClass().toString());
-            //System.out.println("Current motion:"+MotionsDB.getInstance().getCurrentMotion(0).toString());
-            SwingUtilities.invokeLater(new Runnable(){
-            public void run() {              
-                trialLoadingStatus = 3;
-            }
-            });
-            OpenSimDB.getInstance().deleteObserver(this);
-            MotionsDB.getInstance().deleteObserver(this);
-        }
+
     }
     // Filter down the long list of .osim files found, in particular:
     // models that end in _moco are removed as they have no use in the GUI

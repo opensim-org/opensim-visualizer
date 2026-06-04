@@ -6,6 +6,7 @@ package org.opensim.javabrowser;
 
 import org.opensim.addBiomech.AddBiomechanicsHandleDownloadJPanel;
 import com.teamdev.jxbrowser.browser.Browser;
+import com.teamdev.jxbrowser.browser.callback.SavePasswordCallback;
 import com.teamdev.jxbrowser.browser.callback.StartDownloadCallback;
 import com.teamdev.jxbrowser.download.event.DownloadFinished;
 
@@ -69,7 +70,7 @@ public final class AddBiomechanicsTopComponent extends TopComponent {
     Browser browser; 
     public AddBiomechanicsTopComponent() {
         initComponents();
-        Engine engine = Engine.newInstance(EngineOptions.newBuilder(RenderingMode.OFF_SCREEN).licenseKey("5NS6GOQYBIPFCP9K2Y95202NMDQQLZITO27PETD95UJVPMQHJVVD8GEO2UJ9E1D9NNILSGWMG2A1GV4TOQMXOF248GJCGASKC081FX38PYNK02W1ENS8JKXYU3TJCXOUSUCZ7X90YHVCOUD3NU1GHFEZQMAC341IHNU192211JNJQRTRMNFHW").build());
+        Engine engine = jxBrowserTopComponent.createJxBrowserEngine();
         browser = engine.newBrowser();
         // Begin hack
 //            String hackPath="C:\\Users\\ayman\\Downloads\\Subject01 (Processed and Reviewed).zip"; 
@@ -113,6 +114,7 @@ public final class AddBiomechanicsTopComponent extends TopComponent {
         BrowserView view = BrowserView.newInstance(browser);
 
         jPanel1.add(view);
+        browser.set(SavePasswordCallback.class, (params, tell) -> tell.ignore());
         browser.navigation().loadUrl("addbiomechanics.org/login");
         setName(Bundle.CTL_AddBiomechanicsTopComponent());
         setToolTipText(Bundle.HINT_AddBiomechanicsTopComponent());
