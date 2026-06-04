@@ -467,7 +467,9 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
     //
     private void filterModelsFound() {
         modelsFound.removeIf(s -> s.endsWith("_moco.osim"));
-        modelsFound.removeIf(s -> s.contains("ignore_physics"));
+        boolean hasPhysics = modelsFound.stream().anyMatch(s -> s.contains("and_physics"));
+        if (hasPhysics)
+            modelsFound.removeIf(s -> s.contains("ignore_physics"));
     }
 
 }
