@@ -26,7 +26,6 @@ import org.opensim.modeling.Storage;
 import org.opensim.utils.ErrorDialog;
 import org.opensim.view.ObjectSetCurrentEvent;
 import org.opensim.view.motions.MotionEvent;
-import org.opensim.view.motions.MotionTimeChangeEvent;
 import org.opensim.view.motions.MotionsDB;
 import org.opensim.view.pub.OpenSimDB;
 
@@ -290,11 +289,9 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
             System.out.println("File "+zipFilePath+ " is not a zip file. Aborting.");
             return;
         }
-        //System.out.println("Within openModelsFromAddbiomechZip: input file:"+zipFilePath);
         String parentPath = testZip.getParent();
         String destDir = parentPath+"/output/";
-        //String targetFile = "config.txt"; // file to find
-
+        
         File dir = new File(destDir);
         if (!dir.exists()) dir.mkdirs();
         
@@ -304,7 +301,6 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
         while ((entry = zis.getNextEntry()) != null) {
             
             String name = entry.getName();
-            //System.out.println("ZipEntry:"+name);
             File outFile = new File(destDir + name);
 
             if (entry.isDirectory()) {
@@ -326,7 +322,6 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
                 // Check if this is the file we're looking for
                 if (absolutePath.endsWith(".osim")){
                     System.out.println("Found file: " + absolutePath);
-                    System.out.println("Found file name: " + outFile.getName());
                     modelsFound.add(absolutePath);
                 }
                 if (absolutePath.endsWith(".trc")){
@@ -338,7 +333,6 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
         }
         filterModelsFound();
         jProgressTextArea.setText("Processing file:"+zipFilePath+"\n");
-        System.out.println("models found:"+modelsFound);
         jProgressTextArea.append("models found:"+modelsFound+"\n");
         jProgressTextArea.append("trials found:"+availableTrials+"\n");
         for (String item : modelsFound) {
@@ -378,7 +372,6 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
     }
     
     public void executeUserAction() {
-        System.out.println("AddBJPanel.executeUserAction");
         try {
             // Based on user selection, always will open selected model then handle availableTrials and data
             String absolutePath = (String) jModelComboBox.getSelectedItem();
@@ -448,14 +441,10 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
         }
         if (trialLoadingStatus ==1 && arg instanceof MotionEvent &&
                 ((MotionEvent)arg).getOperation() == MotionEvent.Operation.CurrentMotionsChanged){
-            //MotionEvent.Operation op = ((MotionEvent) arg).getOperation();
-            //Storage mot = ((MotionEvent) arg).getMotion();
-//            boolean isIkMotion = (mot==ikMotion);
+            // Load marker data to associate with IK motion, do it on GUI thread so UI is not frozen and so that
+            // changes propagate similar to GUI operation
             SwingUtilities.invokeLater(new Runnable(){
             public void run() {
-                //MotionsDB.getInstance().setCurrent(aModel, ikMotion);
-                System.out.println("trialLoadingStatus="+trialLoadingStatus+
-                        "Received MotionTimeChangeEvent");
                 AddBiomechanicsTrial currentTrial = availableTrials.get(selectedTrialIndex);
                 String trcPath = currentTrial.getStitchedMarkerData();
                 MotionsDB.getInstance().loadMotionFile(trcPath, false);
