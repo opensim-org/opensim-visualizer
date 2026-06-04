@@ -72,20 +72,7 @@ public final class AddBiomechanicsTopComponent extends TopComponent {
         initComponents();
         Engine engine = jxBrowserTopComponent.createJxBrowserEngine();
         browser = engine.newBrowser();
-        // Begin hack
-//            String hackPath="C:\\Users\\ayman\\Downloads\\Subject01 (Processed and Reviewed).zip"; 
-//            AddBiomechanicsHandleDownloadJPanel handlePanel = new AddBiomechanicsHandleDownloadJPanel(hackPath); //fullPath.toString()
-//            DialogDescriptor dlg = new DialogDescriptor(handlePanel,"How to handle download", false, new ActionListener() {
-//                @Override
-//                public void actionPerformed(ActionEvent e) {
-//                    if (e.getSource() == NotifyDescriptor.OK_OPTION){
-//                        handlePanel.executeUserAction();
-//                    }
-//                }
-//            });
-//            DialogDisplayer.getDefault().createDialog(dlg).setVisible(true);
 
-        // End hack
         browser.set(StartDownloadCallback.class, (params, tell) -> {
             params.download().on(DownloadFinished.class, event ->
                     System.out.println("File downloaded!"));
@@ -93,8 +80,8 @@ public final class AddBiomechanicsTopComponent extends TopComponent {
             Path fullPath = downloadPath.resolve(params.download().target().suggestedFileName());
             tell.download(fullPath);
             OpenSimLogger.logMessage("Downloading finished, file:"+fullPath, 0);
-            String hackHackPath="C:\\Users\\ayman\\Downloads\\Subject01 (Processed and Reviewed).zip"; 
-            AddBiomechanicsHandleDownloadJPanel handlePanel = new AddBiomechanicsHandleDownloadJPanel(hackHackPath); //fullPath.toString()
+            //String hackHackPath="C:\\Users\\ayman\\Downloads\\Subject01 (Processed and Reviewed).zip"; 
+            AddBiomechanicsHandleDownloadJPanel handlePanel = new AddBiomechanicsHandleDownloadJPanel(fullPath.toString());
             DialogDescriptor dlg = new DialogDescriptor(handlePanel,"How to handle download", false, new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
