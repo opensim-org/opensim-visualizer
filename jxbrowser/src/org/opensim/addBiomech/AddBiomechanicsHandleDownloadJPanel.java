@@ -11,12 +11,22 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Queue;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.swing.DefaultListModel;
+import javax.swing.SwingUtilities;
 import org.openide.util.Exceptions;
 import org.opensim.modeling.Model;
+import org.opensim.modeling.Storage;
+import org.opensim.utils.ErrorDialog;
+import org.opensim.view.ObjectSetCurrentEvent;
+import org.opensim.view.motions.MotionEvent;
+import org.opensim.view.motions.MotionTimeChangeEvent;
 import org.opensim.view.motions.MotionsDB;
 import org.opensim.view.pub.OpenSimDB;
 
@@ -24,13 +34,18 @@ import org.opensim.view.pub.OpenSimDB;
  *
  * @author ayman
  */
-public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPanel {
+public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPanel implements Observer {
 
     String zipFilePath;
     List<String> modelsFound = new ArrayList<>();
     DefaultListModel<String> trialsModel = new DefaultListModel<>();
     List<AddBiomechanicsTrial> availableTrials = new ArrayList<>();
-
+    Queue<Runnable> queue = new LinkedList<>();
+    Storage ikMotion = null;
+    Model aModel = null;
+    private int trialLoadingStatus=0; // 1 model loaded, 2 motion loaded, 3 associated
+    private String selectedModelPath = "";
+    private int selectedTrialIndex = -1;
     private int userSelectedAction = 0; // 0 Open, 1 Open-associate 2 Open-not-associate
     /**
      * Creates new form AddBiomechanicsHandleDownloadJPanel
@@ -39,6 +54,11 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
         initComponents();
         jTextField1.setText(downloadFile);
         this.zipFilePath = downloadFile;
+        jTrialsList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) { // fires once, not on every drag step
+                selectedTrialIndex = jTrialsList.getSelectedIndex();
+            }
+        });
         processDownload();
     }
 
@@ -80,11 +100,14 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
 
         jInfoPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), org.openide.util.NbBundle.getMessage(AddBiomechanicsHandleDownloadJPanel.class, "AddBiomechanicsHandleDownloadJPanel.jInfoPanel.border.title"))); // NOI18N
 
+        jProgressScrollPane.setAutoscrolls(true);
+
         jProgressTextArea.setEditable(false);
         jProgressTextArea.setColumns(20);
         jProgressTextArea.setLineWrap(true);
         jProgressTextArea.setRows(5);
         jProgressTextArea.setWrapStyleWord(true);
+        jProgressTextArea.setEnabled(false);
         jProgressScrollPane.setViewportView(jProgressTextArea);
 
         javax.swing.GroupLayout jInfoPanelLayout = new javax.swing.GroupLayout(jInfoPanel);
@@ -316,6 +339,7 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
             }
             zis.closeEntry();
         }
+        filterModelsFound();
         jProgressTextArea.setText("Processing file:"+zipFilePath+"\n");
         System.out.println("models found:"+modelsFound);
         jProgressTextArea.append("models found:"+modelsFound+"\n");
@@ -325,6 +349,7 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
         }
         for (AddBiomechanicsTrial item: availableTrials) {
             trialsModel.addElement(item.getName());
+            jProgressTextArea.append(item.getDetails()+"\n");
         }
     }   catch (IOException ex) {
             Exceptions.printStackTrace(ex);
@@ -343,7 +368,7 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
         AddBiomechanicsTrial testTrial = new AddBiomechanicsTrial(trialName);
         int index = availableTrials.indexOf(testTrial);
         if (index==-1){ // new trial
-            AddBiomechanicsTrial newTrial = new AddBiomechanicsTrial(trialName);
+            AddBiomechanicsTrial newTrial = testTrial;
             availableTrials.add(newTrial);
             newTrial.addMarkerDataPath(path);
             newTrial.addSegment(segmentNumber);            
@@ -356,43 +381,28 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
     }
     
     public void executeUserAction() {
+        System.out.println("AddBJPanel.executeUserAction");
         try {
             // Based on user selection, always will open selected model then handle availableTrials and data
             String absolutePath = (String) jModelComboBox.getSelectedItem();
-            Model aModel = new Model(absolutePath);
-            OpenSimDB.getInstance().addModel(aModel);
+            aModel = new Model(absolutePath);
+            // Register as observer so that model and motion changes are triggered in turn not too early
+            OpenSimDB.getInstance().addObserver(this);
+            MotionsDB.getInstance().addObserver(this);
+            trialLoadingStatus = 0;
+            selectedModelPath = absolutePath;
+            SwingUtilities.invokeLater(new Runnable(){
+            public void run() {
+                    try {
+                        OpenSimDB.getInstance().addModel(aModel);
+                    } catch (IOException ex) {
+                        ErrorDialog.displayExceptionDialog(ex);
+                    }
+            }});
             int[] indices = jTrialsList.getSelectedIndices();
 
-            for (int i : indices) {
-                String item = trialsModel.getElementAt(i);
-                System.out.println("Index " + i + ": " + item);
-            }
-            if (userSelectedAction==1 && indices.length >=1){ // 
-                // Get motion from index
-                 String ikFolder = new File(absolutePath).getParentFile().getPath().concat("/../IK/");
-                 //Path folderPath = Paths.get(ikFolder);
-                 for (int i : indices){
-                    System.out.println("Loading motion " + trialsModel.getElementAt(i));
-                    String motFileName = ikFolder+"/"+trialsModel.getElementAt(i)+"_segment_0_ik.mot";
-                    MotionsDB.getInstance().loadMotionFile(motFileName, true);
-                    // Associate trc files with the motion
-                    //MotionsDB.getInstance().loadMotionFile(trialPaths.get(i).toString(), false);
-                 }
-            }
-            else if (userSelectedAction==2 && indices.length >=1){
-                String ikFolder = new File(absolutePath).getParentFile().getPath().concat("/../IK/");
-                 //Path folderPath = Paths.get(ikFolder);
-                for (int i : indices){
-                    System.out.println("Loading motion " + trialsModel.getElementAt(i));
-                    String motFileName = ikFolder+"/"+trialsModel.getElementAt(i)+"_segment_0_ik.mot";
-                    MotionsDB.getInstance().loadMotionFile(motFileName, true);
-                    // Associate trc files with the motion
-                    //MotionsDB.getInstance().loadMotionFile(trialPaths.get(i).toString(), false);
-                }
-                for (int i : indices){
-                    System.out.println("Loading motion " + trialsModel.getElementAt(i));
-                    //MotionsDB.getInstance().loadTrcFile(trialPaths.get(i).toString());
-                }
+            for (int i : indices) { // Single select
+                selectedTrialIndex = i;
             }
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
@@ -412,6 +422,78 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
      */
     public void setUserSelectedAction(int userSelectedAction) {
         this.userSelectedAction = userSelectedAction;
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        System.out.println("received update: observable "+o.getClass().getSimpleName() +
+                "Object is:"+arg.toString());
+        if (userSelectedAction==0){
+           OpenSimDB.getInstance().deleteObserver(this);
+           MotionsDB.getInstance().deleteObserver(this);
+           return;
+        }
+        // When model set current is triggered trialLoadingStatus:0->1
+        if (trialLoadingStatus==0 && arg instanceof ObjectSetCurrentEvent){
+            trialLoadingStatus = 1;
+            jProgressTextArea.append("Model successfully loaded\n");
+            AddBiomechanicsTrial currentTrial = availableTrials.get(selectedTrialIndex);
+            String ikStoFilename = currentTrial.getStitchedIK();
+            SwingUtilities.invokeLater(new Runnable(){
+            public void run() {
+                Storage ikStorage=null;
+                try {
+                    ikStorage = new Storage(ikStoFilename);
+                } catch (IOException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+                if (ikStorage!=null)
+                    MotionsDB.getInstance().loadMotionStorage(ikStorage, true, ikStoFilename);
+            }});
+        }
+        if (trialLoadingStatus ==1 && arg instanceof MotionEvent &&
+                ((MotionEvent)arg).getOperation() == MotionEvent.Operation.CurrentMotionsChanged){
+            //MotionEvent.Operation op = ((MotionEvent) arg).getOperation();
+            //Storage mot = ((MotionEvent) arg).getMotion();
+//            boolean isIkMotion = (mot==ikMotion);
+            SwingUtilities.invokeLater(new Runnable(){
+            public void run() {
+                //MotionsDB.getInstance().setCurrent(aModel, ikMotion);
+                System.out.println("trialLoadingStatus="+trialLoadingStatus+
+                        "Received MotionTimeChangeEvent");
+                AddBiomechanicsTrial currentTrial = availableTrials.get(selectedTrialIndex);
+                String trcPath = currentTrial.getStitchedMarkerData();
+                MotionsDB.getInstance().loadMotionFile(trcPath, false);
+                //
+                SwingUtilities.invokeLater(new Runnable(){
+                    public void run() {              
+                        AddBiomechanicsTrial currentTrial = availableTrials.get(selectedTrialIndex);
+                        String grfPath = currentTrial.getStitchedGrf();
+                        MotionsDB.getInstance().loadMotionFile(grfPath, false);
+                        trialLoadingStatus = 2;
+                    }
+                    });
+            }});
+            
+        }
+        if (trialLoadingStatus==2){
+            System.out.println("Event:"+arg.getClass().toString());
+            //System.out.println("Current motion:"+MotionsDB.getInstance().getCurrentMotion(0).toString());
+            SwingUtilities.invokeLater(new Runnable(){
+            public void run() {              
+                trialLoadingStatus = 3;
+            }
+            });
+            OpenSimDB.getInstance().deleteObserver(this);
+            MotionsDB.getInstance().deleteObserver(this);
+        }
+    }
+    // Filter down the long list of .osim files found, in particular:
+    // models that end in _moco are removed as they have no use in the GUI
+    //
+    private void filterModelsFound() {
+        modelsFound.removeIf(s -> s.endsWith("_moco.osim"));
+        modelsFound.removeIf(s -> s.contains("ignore_physics"));
     }
 
 }

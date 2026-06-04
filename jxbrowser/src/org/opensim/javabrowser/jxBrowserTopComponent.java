@@ -29,7 +29,7 @@ import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.opensim.utils.TheApp;
 import org.opensim.view.ExplorerTopComponent;
-import org.opensim.view.ObjectSetCurrentEvent;
+import org.opensim.view.ModelEvent;
 import org.opensim.view.pub.OpenSimDB;
 import org.opensim.view.pub.ViewDB;
 
@@ -71,7 +71,14 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
         Preferences.userNodeForPackage(TheApp.class).put("LightWeight Browser", savedLightWeight);
         //System.setProperty("jxbrowser.logging.level", "ALL");
 		// This is the hardcoded trial license, eventually this will go into private repo
-        Engine engine = Engine.newInstance(EngineOptions.newBuilder(RenderingMode.OFF_SCREEN).licenseKey("4UNGXAXTRYIHI4S4DZYH52OM3U0NQ188QVOUJDS0M7QMDCF0RKIL1YBWQJT0U6L5GCDZK7J949904OT7JYQUSHQ7ETBOBK9A3RD2ENRJK48F9HH2F8CWAD3MAP1BZKBN4ZVYC0D9R89R75KTYLN").build());
+        Engine engine = Engine.newInstance(EngineOptions.newBuilder(RenderingMode.OFF_SCREEN).licenseKey("4UNGXAXTRYIHI4S4DZYH52OM3U0NQ188QVOUJDS0M7QMDCF0RKIL1YBWQJT0U6L5GCDZK7J949904OT7JYQUSHQ7ETBOBK9A3RD2ENRJK48F9HH2F8CWAD3MAP1BZKBN4ZVYC0D9R89R75KTYLN")
+                    .addSwitch("--js-flags=--max-old-space-size=256")  // JS heap in MB
+                    .addSwitch("--memory-pressure-off")
+                    .addSwitch("--max-gum-fps=60")                     // cap framerate
+                    .addSwitch("--disable-extensions")
+                    .addSwitch("--disable-background-networking")
+                    .addSwitch("--renderer-process-limit=2")           // limit renderer processes
+                    .build());
         browser = engine.newBrowser();
 
         // This clears the cache in the <user-dir>/EmbeddedBrowserCache/Cache
@@ -150,8 +157,8 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
 
     @Override
     public void update(Observable o, Object arg) {
-        if (arg instanceof ObjectSetCurrentEvent){
-            ObjectSetCurrentEvent ev = (ObjectSetCurrentEvent) arg;
+        //System.out.println("jxBrowserTC.update "+arg.toString());
+        if (arg instanceof ModelEvent){
             browser.navigation().loadUrl("http://127.0.0.1:"+portString+"/index.html?css=gui&modern=true");
             //JSValue window = browser.executeJavaScriptAndReturnValue("window");
             //window.asObject().setProperty("myObject", ViewDB.getInstance().getCurrentJson());
