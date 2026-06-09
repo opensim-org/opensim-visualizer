@@ -119,7 +119,7 @@ public class AddBiomechanicsTrial {
             // For now assume segments are numbered 0..segments.size()-1
             for (int segNumber=1; segNumber < segments.size(); segNumber++){
                 TimeSeriesTable tableToAppend = new TimeSeriesTable(getSegmentFileName(firstIKMotFilename, segNumber));
-                TimeSeriesTable appended = TableUtilities.concatenateTable(tally, tableToAppend);
+                TimeSeriesTable appended = TableUtilities.concatenate(tally, tableToAppend);
                 tally = appended;
             }
             int numCols = (int) tally.getNumColumns();
@@ -155,7 +155,7 @@ public class AddBiomechanicsTrial {
             // For now assume segments are numbered 0..segments.size()-1
             for (int segNumber=1; segNumber < segments.size(); segNumber++){
                 TimeSeriesTableVec3 tableToAppend = new TimeSeriesTableVec3(getSegmentFileName(firstTrcFilename, segNumber));
-                TimeSeriesTableVec3 appended = TableUtilities.concatenateTableVec3(tally, tableToAppend);
+                TimeSeriesTableVec3 appended = TableUtilities.concatenateVec3(tally, tableToAppend);
                 tally = appended;
             }
             // copy meta data back into result
@@ -193,7 +193,7 @@ public class AddBiomechanicsTrial {
             // For now assume segments are numbered 0..segments.size()-1
             for (int segNumber = 1; segNumber < segments.size(); segNumber++) {
                 TimeSeriesTable tableToAppend = new TimeSeriesTable(getSegmentFileName(firstGrfFilename, segNumber));
-                TimeSeriesTable appended = TableUtilities.concatenateTable(tally, tableToAppend);
+                TimeSeriesTable appended = TableUtilities.concatenate(tally, tableToAppend);
                 tally = appended;
             }
             int numCols = (int) tally.getNumColumns();

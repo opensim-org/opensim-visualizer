@@ -8,6 +8,7 @@ import org.opensim.addBiomech.AddBiomechanicsHandleDownloadJPanel;
 import com.teamdev.jxbrowser.browser.Browser;
 import com.teamdev.jxbrowser.browser.callback.SavePasswordCallback;
 import com.teamdev.jxbrowser.browser.callback.StartDownloadCallback;
+import com.teamdev.jxbrowser.download.Download;
 import com.teamdev.jxbrowser.download.event.DownloadFinished;
 
 import com.teamdev.jxbrowser.engine.Engine;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.CompletableFuture;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.*;
 import org.openide.awt.ActionID;
@@ -79,18 +81,22 @@ public final class AddBiomechanicsTopComponent extends TopComponent {
             Path downloadPath = Paths.get(AddBiomechPrefs.getDownloadsDir());
             Path fullPath = downloadPath.resolve(params.download().target().suggestedFileName());
             tell.download(fullPath);
-            OpenSimLogger.logMessage("Downloading finished, file:"+fullPath, 0);
-            //String hackHackPath="C:\\Users\\ayman\\Downloads\\Subject01 (Processed and Reviewed).zip"; 
-            AddBiomechanicsHandleDownloadJPanel handlePanel = new AddBiomechanicsHandleDownloadJPanel(fullPath.toString());
-            DialogDescriptor dlg = new DialogDescriptor(handlePanel,"How to handle download", false, new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (e.getSource() == NotifyDescriptor.OK_OPTION){
-                        handlePanel.executeUserAction();
+            Download download = params.download();
+            download.on(DownloadFinished.class, event -> {
+                System.out.println("Finished downloading to path:"+fullPath.toString());
+                AddBiomechanicsHandleDownloadJPanel handlePanel = new AddBiomechanicsHandleDownloadJPanel(fullPath.toString());
+                DialogDescriptor dlg = new DialogDescriptor(handlePanel,"How to handle download", false, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        if (e.getSource() == NotifyDescriptor.OK_OPTION){
+                            handlePanel.executeUserAction();
+                        }
                     }
-                }
+                });
+                DialogDisplayer.getDefault().createDialog(dlg).setVisible(true);
             });
-            DialogDisplayer.getDefault().createDialog(dlg).setVisible(true);
+            OpenSimLogger.logMessage("Downloading finished, file:"+fullPath, 0); 
+            
         });
 
         // This clears the cache in the <user-dir>/EmbeddedBrowserCache/Cache

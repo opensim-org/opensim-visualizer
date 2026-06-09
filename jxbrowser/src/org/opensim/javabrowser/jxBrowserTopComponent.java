@@ -202,4 +202,9 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
         return ExplorerTopComponent.getDefault().getUndoRedo();
     }
 
+    @Override
+    protected void componentDeactivated() {
+        super.componentDeactivated();
+        // called when this TopComponent loses focus
+    }
 }

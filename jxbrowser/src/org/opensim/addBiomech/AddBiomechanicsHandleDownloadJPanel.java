@@ -453,7 +453,9 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
                     public void run() {              
                         AddBiomechanicsTrial currentTrial = availableTrials.get(selectedTrialIndex);
                         String grfPath = currentTrial.getStitchedGrf();
-                        MotionsDB.getInstance().loadMotionFile(grfPath, false);
+                        //System.out.println("currentTrial:grfPath"+grfPath);
+                        if (grfPath != null)
+                            MotionsDB.getInstance().loadMotionFile(grfPath, false);
                         trialLoadingStatus = 2;
                     }
                     });
