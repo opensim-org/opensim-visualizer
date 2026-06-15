@@ -6,17 +6,17 @@
     <description>Builds, tests, and runs the project org.opensim.javabrowser.</description>
     <target name="-pre-compile">
         <echo message="Running pre-build tasks..."/>
-        <get src="https://sourceforge.net/projects/myosin/files/opensim-gui/jxBrowser7-461/jxbrowser-win64-7.44.1.jar/download" 
+        <get src="https://sourceforge.net/projects/myosin/files/opensim-gui/jxBrowser7/jxbrowser-win64-7.44.1.jar/download" 
          dest="release/modules/ext/jxbrowser-win64-7.44.1.jar" 
          usetimestamp="true" 
          verbose="true" />
     </target>
-    <target name="-post-jar">
+<!--    <target name="-post-jar">
         <echo message="Running post-build tasks..."/>
         <get src="https://sourceforge.net/projects/myosin/files/opensim-gui/jxBrowser7-461/org-opensim-javabrowser.jar/download" 
          dest="release/modules/org-opensim-javabrowser.jar" 
          usetimestamp="false" 
          verbose="true" />
-    </target>
+    </target>-->
     <import file="nbproject/build-impl.xml"/>
 </project>
