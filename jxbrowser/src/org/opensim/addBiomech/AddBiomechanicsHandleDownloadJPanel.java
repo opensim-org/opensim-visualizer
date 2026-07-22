@@ -16,10 +16,12 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.swing.DefaultListModel;
 import javax.swing.SwingUtilities;
+import org.eclipse.jetty.WebSocketDB;
 import org.openide.util.Exceptions;
 import org.opensim.modeling.Model;
 import org.opensim.modeling.Storage;
@@ -424,6 +426,15 @@ public final class AddBiomechanicsHandleDownloadJPanel extends javax.swing.JPane
         // When model set current is triggered trialLoadingStatus:0->1
         if (trialLoadingStatus==0 && arg instanceof ObjectSetCurrentEvent){
             trialLoadingStatus = 1;
+            // wait for a client to be available
+            while(WebSocketDB.getInstance().getNumSockets()==0){
+                jProgressTextArea.append("Waiting for 3D window to initialize\n");
+                try { // if no view was ever opened wait until one is opened so we don't send viz prematurely
+                    TimeUnit.SECONDS.sleep(2);
+                } catch (InterruptedException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
             jProgressTextArea.append("Model successfully loaded\n");
             AddBiomechanicsTrial currentTrial = availableTrials.get(selectedTrialIndex);
             String ikStoFilename = currentTrial.getStitchedIK();
