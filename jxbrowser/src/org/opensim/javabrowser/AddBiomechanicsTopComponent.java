@@ -1,3 +1,4 @@
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/NetBeansModuleDevelopment-files/templateTopComponent637.java to edit this template
@@ -14,7 +15,10 @@ import com.teamdev.jxbrowser.download.event.DownloadFinished;
 import com.teamdev.jxbrowser.engine.Engine;
 import com.teamdev.jxbrowser.engine.EngineOptions;
 import com.teamdev.jxbrowser.engine.RenderingMode;
+import com.teamdev.jxbrowser.navigation.event.NavigationFinished;
+import com.teamdev.jxbrowser.navigation.event.NavigationStarted;
 import com.teamdev.jxbrowser.view.swing.BrowserView;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -22,6 +26,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
+import javax.swing.JButton;
+import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.*;
 import org.openide.awt.ActionID;
@@ -70,6 +77,11 @@ import org.opensim.utils.TheApp;
 })
 public final class AddBiomechanicsTopComponent extends TopComponent {
     Browser browser; 
+
+    // Navigation toolbar buttons
+    private JButton backButton;
+    private JButton forwardButton;
+
     public AddBiomechanicsTopComponent() {
         initComponents();
         Engine engine = jxBrowserTopComponent.createJxBrowserEngine();
@@ -106,12 +118,56 @@ public final class AddBiomechanicsTopComponent extends TopComponent {
         // settings for the floor, etc.
         BrowserView view = BrowserView.newInstance(browser);
 
-        jPanel1.add(view);
+        // --- Navigation toolbar (back / forward) ---
+        JToolBar navToolBar = createNavigationToolBar();
+        jPanel1.add(navToolBar, BorderLayout.NORTH);
+        jPanel1.add(view, BorderLayout.CENTER);
+
+        // Keep button enabled state in sync with actual navigation history
+        browser.navigation().on(NavigationStarted.class, event ->
+                SwingUtilities.invokeLater(this::updateNavigationButtons));
+        browser.navigation().on(NavigationFinished.class, event ->
+                SwingUtilities.invokeLater(this::updateNavigationButtons));
+
         browser.set(SavePasswordCallback.class, (params, tell) -> tell.ignore());
         browser.navigation().loadUrl("addbiomechanics.org/login");
         setName(Bundle.CTL_AddBiomechanicsTopComponent());
         setToolTipText(Bundle.HINT_AddBiomechanicsTopComponent());
 
+    }
+
+    /**
+     * Builds a small toolbar with Back/Forward buttons wired to the
+     * browser's navigation history.
+     */
+    private JToolBar createNavigationToolBar() {
+        JToolBar toolBar = new JToolBar();
+        toolBar.setFloatable(false);
+
+        backButton = new JButton("\u2190"); // ←
+        forwardButton = new JButton("\u2192"); // →
+
+        backButton.setToolTipText("Back");
+        forwardButton.setToolTipText("Forward");
+
+        backButton.setEnabled(false);
+        forwardButton.setEnabled(false);
+
+        backButton.addActionListener(e -> browser.navigation().goBack());
+        forwardButton.addActionListener(e -> browser.navigation().goForward());
+
+        toolBar.add(backButton);
+        toolBar.add(forwardButton);
+
+        return toolBar;
+    }
+
+    private void updateNavigationButtons() {
+        if (browser == null) {
+            return;
+        }
+        backButton.setEnabled(browser.navigation().canGoBack());
+        forwardButton.setEnabled(browser.navigation().canGoForward());
     }
 
     /**

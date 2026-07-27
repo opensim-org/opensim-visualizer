@@ -107,12 +107,12 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
             // This is the hardcoded trial license, eventually this will go into private repo
             Engine engine = Engine.newInstance(EngineOptions.newBuilder(RenderingMode.OFF_SCREEN)
                     .licenseKey("4UNGXAXTRYIHI4S4DZYH52OM3U0NQ188QVOUJDS0M7QMDCF0RKIL1YBWQJT0U6L5GCDZK7J949904OT7JYQUSHQ7ETBOBK9A3RD2ENRJK48F9HH2F8CWAD3MAP1BZKBN4ZVYC0D9R89R75KTYLN")
-//                    .addSwitch("--js-flags=--max-old-space-size=256")  // JS heap in MB
-//                    .addSwitch("--memory-pressure-off")
-//                    .addSwitch("--max-gum-fps=60")                     // cap framerate
-//                    .addSwitch("--disable-extensions")
-//                    .addSwitch("--disable-background-networking")
-//                    .addSwitch("--renderer-process-limit=2")           // limit renderer processes
+                    .addSwitch("--js-flags=--max-old-space-size=256")  // JS heap in MB
+                    .addSwitch("--memory-pressure-off")
+                    .addSwitch("--max-gum-fps=60")                     // cap framerate
+                    .addSwitch("--disable-extensions")
+                    .addSwitch("--disable-background-networking")
+                    .addSwitch("--renderer-process-limit=2")           // limit renderer processes
                     .build());
             cacheEngine = engine;
         }
