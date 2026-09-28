@@ -10,6 +10,9 @@ import com.teamdev.jxbrowser.engine.Engine;
 import com.teamdev.jxbrowser.engine.EngineOptions;
 import com.teamdev.jxbrowser.engine.RenderingMode;
 import com.teamdev.jxbrowser.browser.Browser;
+import com.teamdev.jxbrowser.browser.event.ConsoleMessageReceived;
+import com.teamdev.jxbrowser.js.ConsoleMessage;
+import com.teamdev.jxbrowser.navigation.event.NavigationFinished;
 import com.teamdev.jxbrowser.view.swing.BrowserView;
 
 import java.io.BufferedReader;
@@ -19,6 +22,7 @@ import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.prefs.Preferences;
+import javax.swing.SwingUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -59,7 +63,10 @@ import org.opensim.view.pub.ViewDB;
 })
 public final class jxBrowserTopComponent extends TopComponent implements Observer {
     Browser browser; 
+    Browser backgroundBrowser;
     String portString;
+    BrowserView currentView = null;
+    boolean debug=false;
     public jxBrowserTopComponent() {
         initComponents();
         portString = ViewDB.getVisualizationServerPort();
@@ -80,15 +87,31 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
         // the entire EmbeddedBrowserCache folder, so as to retain user
         // settings for the floor, etc.
         BrowserView view = BrowserView.newInstance(browser);
-
-        jPanel1.add(view);
+        currentView = view;
+        jPanel1.add(currentView);
         ViewDB.startVisualizationServer();
         OpenSimDB.getInstance().addObserver(this);
         if (OpenSimDB.getInstance().hasModels()){
             browser.navigation().loadUrl("http://127.0.0.1:"+portString+"/index.html?css=gui&modern=true");
         }
-        else
+        else {
             browser.navigation().loadHtml(getWelcomePage());
+            // load viewer on background thread
+            backgroundBrowser = engine.newBrowser();
+            if (debug){
+                backgroundBrowser.on(ConsoleMessageReceived.class, event -> {
+                    ConsoleMessage message = event.consoleMessage();
+                    System.out.println(
+                        "[" + message.level() + "] " +
+                        message.message() +
+                        " (source: " + message.source() +
+                        ", line: " + message.lineNumber() + ")"
+                    );
+                });
+            }
+
+            backgroundBrowser.navigation().loadUrl("http://127.0.0.1:"+portString+"/index.html?css=gui&modern=true");
+        }
         jPanel1.validate();
          
         setName(Bundle.CTL_jxBrowserTopComponent());
@@ -152,7 +175,15 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
     public void update(Observable o, Object arg) {
         if (arg instanceof ObjectSetCurrentEvent){
             ObjectSetCurrentEvent ev = (ObjectSetCurrentEvent) arg;
-            browser.navigation().loadUrl("http://127.0.0.1:"+portString+"/index.html?css=gui&modern=true");
+            SwingUtilities.invokeLater(new Runnable(){
+                @Override
+                public void run() {
+                    jPanel1.remove(currentView);
+                    BrowserView newView = BrowserView.newInstance(backgroundBrowser);
+                    jPanel1.add(newView);
+                    jPanel1.validate();
+                }
+            });
             //JSValue window = browser.executeJavaScriptAndReturnValue("window");
             //window.asObject().setProperty("myObject", ViewDB.getInstance().getCurrentJson());
             OpenSimDB.getInstance().deleteObserver(this);
