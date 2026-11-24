@@ -36,7 +36,7 @@ import org.opensim.view.ExplorerTopComponent;
 import org.opensim.view.ObjectSetCurrentEvent;
 import org.opensim.view.pub.OpenSimDB;
 import org.opensim.view.pub.ViewDB;
-
+import org.opensim.logger.OpenSimLogger;
 /**
  * Top component which displays something.
  */
@@ -98,18 +98,17 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
             browser.navigation().loadHtml(getWelcomePage());
             // load viewer on background thread
             backgroundBrowser = engine.newBrowser();
-            if (debug){
-                backgroundBrowser.on(ConsoleMessageReceived.class, event -> {
+            backgroundBrowser.on(ConsoleMessageReceived.class, event -> {
                     ConsoleMessage message = event.consoleMessage();
-                    System.out.println(
-                        "[" + message.level() + "] " +
-                        message.message() +
-                        " (source: " + message.source() +
-                        ", line: " + message.lineNumber() + ")"
-                    );
-                });
-            }
-
+                    if (debug){
+                        OpenSimLogger.logMessage(
+                            "[" + message.level() + "] " +
+                            message.message() +
+                            " (source: " + message.source() +
+                            ", line: " + message.lineNumber() + ")", 1
+                        );
+                    }
+            });
             backgroundBrowser.navigation().loadUrl("http://127.0.0.1:"+portString+"/index.html?css=gui&modern=true");
         }
         jPanel1.validate();
@@ -188,6 +187,7 @@ public final class jxBrowserTopComponent extends TopComponent implements Observe
             //window.asObject().setProperty("myObject", ViewDB.getInstance().getCurrentJson());
             OpenSimDB.getInstance().deleteObserver(this);
         }
+        debug = ViewDB.getInstance().isDebugBrowser();
      }
 
     private String getWelcomePage() {
