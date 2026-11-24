@@ -5,22 +5,38 @@
  */
 package org.opensim.javabrowser;
 
-import com.teamdev.jxbrowser.chromium.Browser;
-import com.teamdev.jxbrowser.chromium.BrowserType;
-import com.teamdev.jxbrowser.chromium.events.LoadListener;
-import com.teamdev.jxbrowser.chromium.events.RenderEvent;
-import com.teamdev.jxbrowser.chromium.events.RenderListener;
-import com.teamdev.jxbrowser.chromium.swing.BrowserView;
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import javax.swing.JButton;
+
+import com.teamdev.jxbrowser.engine.Engine;
+import com.teamdev.jxbrowser.engine.EngineOptions;
+import com.teamdev.jxbrowser.engine.RenderingMode;
+import com.teamdev.jxbrowser.browser.Browser;
+import com.teamdev.jxbrowser.browser.event.ConsoleMessageReceived;
+import com.teamdev.jxbrowser.js.ConsoleMessage;
+import com.teamdev.jxbrowser.navigation.event.NavigationFinished;
+import com.teamdev.jxbrowser.view.swing.BrowserView;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.prefs.Preferences;
 import javax.swing.SwingUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
+import org.openide.awt.UndoRedo;
+import org.openide.modules.Places;
+import org.openide.util.Exceptions;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
-
+import org.opensim.utils.TheApp;
+import org.opensim.view.ExplorerTopComponent;
+import org.opensim.view.ObjectSetCurrentEvent;
+import org.opensim.view.pub.OpenSimDB;
+import org.opensim.view.pub.ViewDB;
+import org.opensim.logger.OpenSimLogger;
 /**
  * Top component which displays something.
  */
@@ -41,21 +57,60 @@ import org.openide.util.NbBundle.Messages;
         preferredID = "jxBrowserTopComponent"
 )
 @Messages({
-    "CTL_jxBrowserAction=jxBrowser",
-    "CTL_jxBrowserTopComponent=jxBrowser Window",
-    "HINT_jxBrowserTopComponent=This is a jxBrowser window"
+    "CTL_jxBrowserAction=Visualizer",
+    "CTL_jxBrowserTopComponent=Visualizer Window",
+    "HINT_jxBrowserTopComponent=This is a Visualizer window"
 })
-public final class jxBrowserTopComponent extends TopComponent {
+public final class jxBrowserTopComponent extends TopComponent implements Observer {
     Browser browser; 
-    BrowserView view; 
-
+    Browser backgroundBrowser;
+    String portString;
+    BrowserView currentView = null;
+    boolean debug=false;
     public jxBrowserTopComponent() {
         initComponents();
+        portString = ViewDB.getVisualizationServerPort();
+        String useGPU = "On";        
+        String savedGPU = Preferences.userNodeForPackage(TheApp.class).get("GPU Acceleration", useGPU);
+        Preferences.userNodeForPackage(TheApp.class).put("GPU Acceleration", savedGPU);
+        String useLightWeight = "Off";        
+        String savedLightWeight = Preferences.userNodeForPackage(TheApp.class).get("LightWeight Browser", useLightWeight);
+        Preferences.userNodeForPackage(TheApp.class).put("LightWeight Browser", savedLightWeight);
+        //System.setProperty("jxbrowser.logging.level", "ALL");
+		// This is the hardcoded trial license, eventually this will go into private repo
+        Engine engine = Engine.newInstance(EngineOptions.newBuilder(RenderingMode.OFF_SCREEN).licenseKey("4UNGXAXTRYIHI4S4DZYH52OM3U0NQ188QVOUJDS0M7QMDCF0RKIL1YBWQJT0U6L5GCDZK7J949904OT7JYQUSHQ7ETBOBK9A3RD2ENRJK48F9HH2F8CWAD3MAP1BZKBN4ZVYC0D9R89R75KTYLN").build());
+        browser = engine.newBrowser();
 
-        browser = new Browser(BrowserType.HEAVYWEIGHT);
-        view = new BrowserView(browser);
-        jPanel1.add(view);
-        browser.loadURL("http://threejs.org/editor");
+        // This clears the cache in the <user-dir>/EmbeddedBrowserCache/Cache
+        // folder (asynchronously). Doing so is necessary to ensure that Models
+        // reliably show up in the visualizer. It's important to not delete
+        // the entire EmbeddedBrowserCache folder, so as to retain user
+        // settings for the floor, etc.
+        BrowserView view = BrowserView.newInstance(browser);
+        currentView = view;
+        jPanel1.add(currentView);
+        ViewDB.startVisualizationServer();
+        OpenSimDB.getInstance().addObserver(this);
+        if (OpenSimDB.getInstance().hasModels()){
+            browser.navigation().loadUrl("http://127.0.0.1:"+portString+"/index.html?css=gui&modern=true");
+        }
+        else {
+            browser.navigation().loadHtml(getWelcomePage());
+            // load viewer on background thread
+            backgroundBrowser = engine.newBrowser();
+            backgroundBrowser.on(ConsoleMessageReceived.class, event -> {
+                    ConsoleMessage message = event.consoleMessage();
+                    if (debug){
+                        OpenSimLogger.logMessage(
+                            "[" + message.level() + "] " +
+                            message.message() +
+                            " (source: " + message.source() +
+                            ", line: " + message.lineNumber() + ")", 1
+                        );
+                    }
+            });
+            backgroundBrowser.navigation().loadUrl("http://127.0.0.1:"+portString+"/index.html?css=gui&modern=true");
+        }
         jPanel1.validate();
          
         setName(Bundle.CTL_jxBrowserTopComponent());
@@ -96,7 +151,6 @@ public final class jxBrowserTopComponent extends TopComponent {
     @Override
     public void componentOpened() {
         // TODO add custom code on component opening
-        //browser.reload();
     }
 
     @Override
@@ -115,4 +169,49 @@ public final class jxBrowserTopComponent extends TopComponent {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
     }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        if (arg instanceof ObjectSetCurrentEvent){
+            ObjectSetCurrentEvent ev = (ObjectSetCurrentEvent) arg;
+            SwingUtilities.invokeLater(new Runnable(){
+                @Override
+                public void run() {
+                    jPanel1.remove(currentView);
+                    BrowserView newView = BrowserView.newInstance(backgroundBrowser);
+                    jPanel1.add(newView);
+                    jPanel1.validate();
+                }
+            });
+            //JSValue window = browser.executeJavaScriptAndReturnValue("window");
+            //window.asObject().setProperty("myObject", ViewDB.getInstance().getCurrentJson());
+            OpenSimDB.getInstance().deleteObserver(this);
+        }
+        debug = ViewDB.getInstance().isDebugBrowser();
+     }
+
+    private String getWelcomePage() {
+        BufferedReader in=null;
+        String htmlString="Welcome to OpenSim 4.0";
+        try {
+            
+            URL welcomeURL = getClass().getClassLoader().getResource("org/opensim/javabrowser/welcome.html");
+            in = new BufferedReader(
+                    new InputStreamReader(welcomeURL.openStream()));
+            String inputLine;
+            htmlString = "";
+            while ((inputLine = in.readLine()) != null)
+                htmlString = htmlString.concat(inputLine);
+            in.close();
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        } 
+        return ("<html><body>"+htmlString+"</body></html>");
+     }
+    
+    @Override
+    public UndoRedo getUndoRedo() {
+        return ExplorerTopComponent.getDefault().getUndoRedo();
+    }
+
 }
